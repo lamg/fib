@@ -95,7 +95,7 @@ fib.(n+1)~. Calculating the assigments to maintain ~P~:
 
 When ~n = 0~, ~x = fib.0 ∧ y = fib.1~ and in this case
 fib is defined, therefore loop's precondition is true
-with ~n,x,y := 0,0,1~. ~P~ also implies the procedure
+with ~n,x,y := 0,0,1~. ~P ∧ ¬B~ implies the procedure
 postcondition by weakening the conjunction. Finally the
 program is:
 
