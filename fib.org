@@ -42,7 +42,7 @@ func fibonacci(N int) (x int) {
 }
 #+END_SRC
 
-Notice that [P ∧ B ⇒ x = fib.N ∧ n = N]. Now for maintaining the
+Notice that [P ∧ ¬B ⇒ x = fib.N ∧ n = N]. Now for maintaining the
 invariant:
 
 #+BEGIN_SRC
