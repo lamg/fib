@@ -1,0 +1,170 @@
+#+TITLE: An exercise on formal derivation
+#+AUTHOR: Luis Ángel Méndez Gort
+#+EMAIL: gort.andres000@gmail.com
+
+* The Fibonacci procedure
+
+The following procedure calculates the Fibonacci numbers.
+It is calculated using Dijkstra's program derivation
+techniques.
+
+The specification is:
+
+#+BEGIN_SRC go
+func fibonacci(N int) (x int) {
+	//{ N ≥ 0}
+	//{ x = fib.N }
+}
+#+END_SRC
+
+The fib function is defined as:
+
+#+BEGIN_SRC
+fib.0 = 0
+fib.1 = 1
+fib.n = fib.n + fib.(n-1)
+#+END_SRC
+
+The previous definition suggest making a loop, therefore:
+
+#+BEGIN_SRC go
+func fibonacci(N int) (x int) {
+	//{ N ≥ 0}
+	n, x := 0, 0
+	// P: 0 ≤ n ≤ N ∧ x = fib.n
+	// B: n ≠ N
+	// { P }
+	for n != N {
+		// { P ∧ B }
+		// { P }
+	}
+	//{ x = fib.N ∧ n = N}
+}
+#+END_SRC
+
+Notice that [P ∧ B ⇒ x = fib.N ∧ n = N]. Now for maintaining the
+invariant:
+
+#+BEGIN_SRC
+  (n := n+1).P
+≡ { definition of P, textual substitution}
+  0 ≤ n+1 ≤ N ∧ x = fib.(n+1)
+≡ { B, P }
+  x = fib.(n+1)
+≡ { definition of fib}
+  x = fib.n + fib.(n-1)
+≡ { P, introducing y}
+  x = X + Y
+#+END_SRC
+
+After the introduction of ~y~ we need to add 
+~Q: y = fib.(n-1)~ to the invariant and maintaining it:
+
+#+BEGIN_SRC
+  (n := n+1).Q
+≡ { definition of Q, textual substitution}
+  y = fib.(n+1 - 1)
+≡ { arithmetic}
+  y = fib.n
+≡ { P }
+  y = X
+#+END_SRC
+
+Now ~n, x, y := x+y, x, n+1~ maintains ~P ∧ Q~, but when ~n = 0~,
+~y=fib.(n-1)~ is not defined,therefore the ~y~ is changed to overcome
+that problem. The introduction of ~y~ is triggered by the
+impossibility of expressing the value ~fib.(n-1)~ in terms of ~x~. But
+that value appears after trying to express the value ~fib.(n+1)~ in
+terms of ~x~, and there is another oportunity for introducing a
+variable. Therefore ~P: 0 ≤ n ≤ N ∧ x = fib.n ∧ y =
+fib.(n+1)~. Calculating the assigments to maintain ~P~:
+
+#+BEGIN_SRC
+  (n := n+1).P
+≡ {definition of P, textual substitution}
+  0 ≤ n+1 ≤ N ∧ x = fib.(n+1) ∧ y = fib.(n+1 + 1)
+≡ {P ∧ B, arithmetic}
+  x = fib.(n+1) ∧ y = fib.(n+2)
+≡ {P}
+  x = Y ∧ y = fib.(n+2)
+≡ {definition of fib}
+  x = Y ∧ y = fib.(n+1) + fib.n
+≡ {P}
+  x = Y ∧ y = Y + X
+#+END_SRC
+
+When ~n = 0~, ~x = fib.0 ∧ y = fib.1~ and in this case
+fib is defined, therefore loop's precondition is true
+with ~n,x,y := 0,0,1~. ~P~ also implies the procedure
+postcondition by weakening the conjunction. Finally the
+program is:
+
+#+NAME: fibonacci
+#+BEGIN_SRC go
+func fibonacci(N int) (x int) {
+	//{ N ≥ 0}
+	n, x, y := 0, 0, 1
+	// P: 0 ≤ n ≤ N ∧ x = fib.n
+	// B: n ≠ N
+	// { P }
+	for n != N {
+		// { P ∧ B }
+		n, x, y = n+1, y, x+y
+		// { P }
+	}
+	//{ x = fib.N ∧ n = N}
+	return
+}
+#+END_SRC
+
+The proof of termination, with bound function ~N-n~ is:
+
+#+BEGIN_SRC
+Demonstrandum: {P ∧ B ∧ N-n=C} n,x,y := n+1,y,x+y {N-n < C}
+Proof:
+  (n := n+1).(N-n)
+= {textual substitution,arithmetic}
+  N - n - 1
+= {precondition}
+  C - 1
+< {arithmetic}
+  C
+#+END_SRC
+
+Finally, it is important to beware that the bounds of
+the type ~int~ of Go have not been considered, so for
+~fib.N ≥ sizeof(int)~ the program won't work.
+
+* A simple command line interface
+
+#+BEGIN_SRC go :noweb yes :tangle fib.go
+package main
+
+import (
+	"fmt"
+	"os"
+	"strconv"
+)
+
+var usage = "Usage: %s NaturalNumber\n"
+
+func main() {
+	x := 1
+	if len(os.Args) == 2 {
+		N, e := strconv.Atoi(os.Args[1])
+		var r int
+		if e == nil && N >= 0 {
+			r = fibonacci(N)
+			println(r)
+			x = 1
+		} else {
+			fmt.Fprintf(os.Stderr, usage, os.Args[0])
+		}
+	} else {
+		fmt.Fprintf(os.Stderr, usage, os.Args[0])
+	}
+	os.Exit(x)
+}
+
+<<fibonacci>>
+#+END_SRC
