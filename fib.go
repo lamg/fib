@@ -1,34 +1,22 @@
+// Fibonacci numbers calculator
 package main
 
 import (
-	"fmt"
-	"os"
-	"strconv"
+	"flag"
 )
 
-var usage = "Usage: %s NaturalNumber\n"
-
 func main() {
-	x := 1
-	if len(os.Args) == 2 {
-		N, e := strconv.Atoi(os.Args[1])
-		var r int
-		if e == nil && N >= 0 {
-			r = fibonacci(N)
-			println(r)
-			x = 1
-		} else {
-			fmt.Fprintf(os.Stderr, usage, os.Args[0])
-		}
-	} else {
-		fmt.Fprintf(os.Stderr, usage, os.Args[0])
-	}
-	os.Exit(x)
+	var N = flag.Uint64("N", 0, "N ≥ 0")
+
+	flag.Parse()
+	r := fibonacci(*N)
+	println(r)
 }
 
-func fibonacci(N int) (x int) {
+func fibonacci(N uint64) (x uint64) {
+  var n, y uint64
 	//{ N ≥ 0}
-	n, x, y := 0, 0, 1
+	n, x, y = 0, 0, 1
 	// P: 0 ≤ n ≤ N ∧ x = fib.n
 	// B: n ≠ N
 	// { P }

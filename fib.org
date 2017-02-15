@@ -11,7 +11,7 @@ techniques.
 The specification is:
 
 #+BEGIN_SRC go
-func fibonacci(N int) (x int) {
+func fibonacci(N uint64) (x uint64) {
 	//{ N ≥ 0}
 	//{ x = fib.N }
 }
@@ -28,9 +28,10 @@ fib.n = fib.n + fib.(n-1)
 The previous definition suggest making a loop, therefore:
 
 #+BEGIN_SRC go
-func fibonacci(N int) (x int) {
+func fibonacci(N uint64) (x uint64) {
+  var n uint64
 	//{ N ≥ 0}
-	n, x := 0, 0
+	n, x = 0, 0
 	// P: 0 ≤ n ≤ N ∧ x = fib.n
 	// B: n ≠ N
 	// { P }
@@ -101,9 +102,10 @@ program is:
 
 #+NAME: fibonacci
 #+BEGIN_SRC go
-func fibonacci(N int) (x int) {
+func fibonacci(N uint64) (x uint64) {
+  var n, y uint64
 	//{ N ≥ 0}
-	n, x, y := 0, 0, 1
+	n, x, y = 0, 0, 1
 	// P: 0 ≤ n ≤ N ∧ x = fib.n
 	// B: n ≠ N
 	// { P }
@@ -132,38 +134,25 @@ Proof:
 #+END_SRC
 
 Finally, it is important to beware that the bounds of
-the type ~int~ of Go have not been considered, so for
+the type ~uint64~ of Go have not been considered, so for
 ~fib.N ≥ sizeof(int)~ the program won't work.
 
 * A simple command line interface
 
 #+BEGIN_SRC go :noweb yes :tangle fib.go
+// Fibonacci numbers calculator
 package main
 
 import (
-	"fmt"
-	"os"
-	"strconv"
+	"flag"
 )
 
-var usage = "Usage: %s NaturalNumber\n"
-
 func main() {
-	x := 1
-	if len(os.Args) == 2 {
-		N, e := strconv.Atoi(os.Args[1])
-		var r int
-		if e == nil && N >= 0 {
-			r = fibonacci(N)
-			println(r)
-			x = 1
-		} else {
-			fmt.Fprintf(os.Stderr, usage, os.Args[0])
-		}
-	} else {
-		fmt.Fprintf(os.Stderr, usage, os.Args[0])
-	}
-	os.Exit(x)
+	var N = flag.Uint64("N", 0, "N ≥ 0")
+
+	flag.Parse()
+	r := fibonacci(*N)
+	println(r)
 }
 
 <<fibonacci>>
